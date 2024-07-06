@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>County Click</title>
+</head>
+<body>
+    <!-- External SVG inclusion -->
+    <object id="svgObject" data="California_counties_outline_map.svg" type="image/svg+xml" width="500" height="500"></object>
+    <!-- Placeholder for displaying clicked county's ID -->
+    <div id="selectedCounty">Click on a county to see its ID.</div>
+
+    <div id="SideMap" style="width: 500px; height: 500px; border: 1px solid black;">Click to Display Side Map </div>
+
+    <script>
+        function zoomToFeature(target) {
+    const bbox = target.getBBox();
+    const padding = 30; // Adjust padding as needed
+    const newViewBox = `${bbox.x - padding} ${bbox.y - padding} ${bbox.width + 2 * padding} ${bbox.height + 2 * padding}`;
+    target.ownerSVGElement.setAttribute('viewBox', newViewBox);
+
+
+
+    // in SideMap div, display the detailed map of the clicked county
+    
+    const sideMapObject = document.getElementById('SideMap');
+
+    // Create a new SVG from the target
+    const newSVG = target.cloneNode(true);
+
+
+    // Set the width and height to 100% to fill the container
+    newSVG.setAttribute('width', '100%');
+
+    // Append the new SVG to the side map
+    sideMapObject.innerHTML = '';
+    sideMapObject.appendChild(newSVG);
+}
+
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const svgObject = document.getElementById('svgObject');
+    
+            function setupSVGListeners() {
+                const svgDoc = svgObject.contentDocument;
+                if (svgDoc) {
+                    // SVG is accessible, proceed to add event listeners
+                    const paths = svgDoc.querySelectorAll('path');
+                    //Also select polyline 
+                    const polylines = svgDoc.querySelectorAll('polyline');
+
+    
+                    console.log("Found " + paths.length + " paths.");
+                    paths.forEach(path => {
+                        path.addEventListener('click', function(event) {
+                            const population = event.target.getAttribute('data-population');
+                            console.log("Clicked on county with ID: " + event.target.id + " With Population: "+ population);
+                            document.getElementById('selectedCounty').innerText = 'Selected County ID: ' + event.target.id + "With population" + population;
+                            zoomToFeature(event.target);
+                            //displaySideMap(event.target.id);
+    // Clear SideMap and append the polyline to the SideMap
+    const sideMapObject = document.getElementById('SideMap');
+    sideMapObject.innerHTML = ''; // Clear existing content
+
+    // Create a new SVG element
+    const newSVG = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    newSVG.setAttribute('width', '100%');
+    newSVG.setAttribute('height', '100%');
+    newSVG.setAttribute('viewBox', event.target.getBBox().x + ' ' + event.target.getBBox().y + ' ' + event.target.getBBox().width + ' ' + event.target.getBBox().height);
+
+    // Clone the polyline and append it to the new SVG
+    const clonedPolyline = event.target.cloneNode(true);
+    newSVG.appendChild(clonedPolyline);
+
+    // Append the new SVG to the SideMap
+    sideMapObject.appendChild(newSVG);
+                            //print current zoom box
+                            console.log("Current zoom box is: " + event.target.getBBox().x + " " + event.target.getBBox().y + " " + event.target.getBBox().width + " " + event.target.getBBox().height);
+                        });
+                    });
+
+                    polylines.forEach(polyline => {
+                        polyline.addEventListener('click', function(event) {
+                            const population = event.target.getAttribute('data-population');
+                            console.log("Clicked on county with ID: " + event.target.id + " population with "+ population);
+                            document.getElementById('selectedCounty').innerText = 'Selected County ID: ' + event.target.id + "with population" + population;
+                            zoomToFeature(event.target);
+                            //print current zoom box
+                            console.log("Current zoom box is: " + event.target.getBBox());
+
+         // Clear SideMap and append the polyline to the SideMap
+    const sideMapObject = document.getElementById('SideMap');
+    sideMapObject.innerHTML = ''; // Clear existing content
+
+    // Create a new SVG element
+    const newSVG = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    newSVG.setAttribute('width', '100%');
+    newSVG.setAttribute('height', '100%');
+    newSVG.setAttribute('viewBox', event.target.getBBox().x + ' ' + event.target.getBBox().y + ' ' + event.target.getBBox().width + ' ' + event.target.getBBox().height);
+
+    // Clone the polyline and append it to the new SVG
+    const clonedPolyline = event.target.cloneNode(true);
+    newSVG.appendChild(clonedPolyline);
+
+    // Append the new SVG to the SideMap
+    sideMapObject.appendChild(newSVG);
+
+                        
+
+
+                            //displaySideMap(event.target.id);
+                        });
+                    });
+                } else {
+                    // SVG not loaded yet, try again after a short delay
+                    setTimeout(setupSVGListeners, 100);
+                }
+            }
+    
+            setupSVGListeners();
+        });
+    </script>
+</body>
+</html>
